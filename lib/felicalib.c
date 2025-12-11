@@ -104,6 +104,7 @@ void pasori_close(pasori *p)
 {
     p->dispose_library();
     FreeLibrary(p->hInstDLL);
+    free(p);
 }
 
 /**
