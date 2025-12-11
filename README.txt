@@ -1,13 +1,13 @@
-* FeliCa Library
+﻿* FeliCa Library
 
-PaSoRi ���g���� FeliCa �ɃA�N�Z�X���邽�߂̃��C�u�����ł��B
+PaSoRi を使って FeliCa にアクセスするためのライブラリです。
 
-�ڍׂ� http://felicalib.tmurakam.org ���Q�Ƃ��Ă��������B
+詳細は http://felicalib.tmurakam.org を参照してください。
 
 
-** �r���h�菇
+** ビルド手順
 
-Visual Studio 2008 �p�̃v���W�F�N�g�t�@�C����Y�t���Ă���܂��B
-src\FelicaLib.sln ���J���ăr���h���Ă��������B
+Visual Studio 2008 用のプロジェクトファイルを添付してあります。
+src\FelicaLib.sln を開いてビルドしてください。
 
-�܂��AC# �p�̃v���W�F�N�g�� src\CSharp �ɂ���܂��B
+また、C# 用のプロジェクトは src\CSharp にあります。

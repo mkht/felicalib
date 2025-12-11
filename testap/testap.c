@@ -1,4 +1,4 @@
-/*
+﻿/*
  felicalib - FeliCa access wrapper library
 
  Copyright (c) 2007, Takuya Murakami, All rights reserved.

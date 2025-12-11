@@ -1,4 +1,4 @@
-/*
+ï»¿/*
   felicalib - FeliCa access wrapper library
 
   Copyright (c) 2007, Takuya Murakami, All rights reserved.
@@ -33,7 +33,7 @@
 /**
    @file dump.c
 
-   FeliCa ƒ_ƒ“ƒv
+   FeliCa ãƒ€ãƒ³ãƒ—
 */
 
 #include <stdio.h>

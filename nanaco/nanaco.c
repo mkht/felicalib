@@ -1,4 +1,4 @@
-/*
+ï»¿/*
   felicalib - FeliCa access wrapper library
 
   Copyright (c) 2007, Takuya Murakami, All rights reserved.
@@ -33,7 +33,7 @@
 /**
    @file nanaco.c
 
-   nanaco ƒ_ƒ“ƒv
+   nanaco ãƒ€ãƒ³ãƒ—
 */
 
 #include <stdio.h>
@@ -98,21 +98,21 @@ static void nanaco_dump(uint8 *data)
 
     switch (data[0]) {
     case 0x47:
-        _tprintf(_T("Žx•¥     "));
+        _tprintf(_T("æ”¯æ‰•     "));
         break;
     case 0x6f:
-        _tprintf(_T("ƒ`ƒƒ[ƒW "));
+        _tprintf(_T("ãƒãƒ£ãƒ¼ã‚¸ "));
         break;
     default:
-        _tprintf(_T("•s–¾     "));
+        _tprintf(_T("ä¸æ˜Ž     "));
         break;
     }
 
     value = read4b(data + 1);
-    _tprintf(_T("‹àŠz:%-6d‰~ "), value);
+    _tprintf(_T("é‡‘é¡:%-6då†† "), value);
 
     value = read4b(data + 5);
-    _tprintf(_T("Žc‚:%-6d‰~ "), value);
+    _tprintf(_T("æ®‹é«˜:%-6då†† "), value);
 
     value = read4b(data + 9);
     yy = value >> 21;
@@ -123,7 +123,7 @@ static void nanaco_dump(uint8 *data)
     _tprintf(_T("%02d/%02d/%02d %02d:%02d "), yy, mm, dd, hh, min);
 
     value = read2b(data + 13);
-    _tprintf(_T("˜A”Ô: %d\n"), value);
+    _tprintf(_T("é€£ç•ª: %d\n"), value);
 }
 
 static int read4b(uint8 *p)

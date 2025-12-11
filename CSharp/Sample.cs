@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using FelicaLib;
@@ -28,7 +28,7 @@ namespace FelicaLib
             byte[] data = f.ReadWithoutEncryption(0x558b, 0);
             if (data == null)
             {
-                throw new Exception("nanaco ID ‚ª“Ç‚İæ‚ê‚Ü‚¹‚ñ");
+                throw new Exception("nanaco ID ãŒèª­ã¿å–ã‚Œã¾ã›ã‚“");
             }
             Console.Write("Nanaco ID = ");
             for (int i = 0; i < 8; i++) {
@@ -45,10 +45,10 @@ namespace FelicaLib
                 {
                     case 0x47:
                     default:
-                        Console.Write("x•¥     ");
+                        Console.Write("æ”¯æ‰•     ");
                         break;
                     case 0x6f:
-                        Console.Write("ƒ`ƒƒ[ƒW ");
+                        Console.Write("ãƒãƒ£ãƒ¼ã‚¸ ");
                         break;
                 }
 
@@ -62,13 +62,13 @@ namespace FelicaLib
                 Console.Write("{0}/{1:D2}/{2:D2} {3:D2}:{4:D2}", year, month, date, hour, min);
 
                 value = (data[1] << 24) + (data[2] << 16) + (data[3] << 8) + data[4];
-                Console.Write("  ‹àŠz {0,6}‰~", value);
+                Console.Write("  é‡‘é¡ {0,6}å††", value);
 
                 value = (data[5] << 24) + (data[6] << 16) + (data[7] << 8) + data[8];
-                Console.Write("  c‚ {0,6}‰~", value);
+                Console.Write("  æ®‹é«˜ {0,6}å††", value);
 
                 value = (data[13] << 8) + data[14];
-                Console.WriteLine("  ˜A”Ô {0}", value);
+                Console.WriteLine("  é€£ç•ª {0}", value);
             }
         }
     }

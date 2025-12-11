@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  felicalib - FeliCa access wrapper library
 
  Copyright (c) 2007, Takuya Murakami, All rights reserved.
@@ -33,7 +33,7 @@
 /**
   @file suica.c
 
-  suica —š—ğƒ_ƒ“ƒv (“üoê—š—ğ‚Í–¢‘Î‰)
+  suica å±¥æ­´ãƒ€ãƒ³ãƒ— (å…¥å‡ºå ´å±¥æ­´ã¯æœªå¯¾å¿œ)
 */
 
 #include <stdio.h>
@@ -48,7 +48,7 @@ static LPCTSTR procType(int proc);
 static int read4b(uint8 *p);
 static int read2b(uint8 *p);
 
-// ƒT[ƒrƒXƒR[ƒh
+// ã‚µãƒ¼ãƒ“ã‚¹ã‚³ãƒ¼ãƒ‰
 #define SERVICE_SUICA_INOUT     0x108f
 #define SERVICE_SUICA_HISTORY   0x090f
 
@@ -100,28 +100,28 @@ static void suica_dump_history(uint8 *data)
     int in_line, in_sta, out_line, out_sta;
     int yy, mm, dd;
 
-    ctype = data[0];            // ’[––í
-    proc = data[1];             // ˆ—
-    date = read2b(data + 4);    // “ú•t
-    balance = read2b(data + 10);// c‚
+    ctype = data[0];            // ç«¯æœ«ç¨®
+    proc = data[1];             // å‡¦ç†
+    date = read2b(data + 4);    // æ—¥ä»˜
+    balance = read2b(data + 10);// æ®‹é«˜
     balance = N2HS(balance);
     seq = read4b(data + 12);
     region = seq & 0xff;        // Region
-    seq >>= 8;                  // ˜A”Ô
+    seq >>= 8;                  // é€£ç•ª
 
     out_line = -1;
     out_sta = -1;
     time = -1;
 
     switch (ctype) {
-    case 0xC7:  // •¨”Ì
-    case 0xC8:  // ©”Ì‹@          
+    case 0xC7:  // ç‰©è²©
+    case 0xC8:  // è‡ªè²©æ©Ÿ          
         time = read2b(data + 6);
         in_line = data[8];
         in_sta = data[9];
         break;
 
-    case 0x05:  // ÔÚ‹@
+    case 0x05:  // è»Šè¼‰æ©Ÿ
         in_line = read2b(data + 6);
         in_sta = read2b(data + 8);
         break;
@@ -134,16 +134,16 @@ static void suica_dump_history(uint8 *data)
         break;
     }
 
-    _tprintf(_T("’[––í:%s "), (LPCTSTR)consoleType(ctype));
-    _tprintf(_T("ˆ—:%s "), (LPCTSTR)procType(proc));
+    _tprintf(_T("ç«¯æœ«ç¨®:%s "), (LPCTSTR)consoleType(ctype));
+    _tprintf(_T("å‡¦ç†:%s "), (LPCTSTR)procType(proc));
 
-    // “ú•t
+    // æ—¥ä»˜
     yy = date >> 9;
     mm = (date >> 5) & 0xf;
     dd = date & 0x1f;
     _tprintf(_T("%02d/%02d/%02d "), yy, mm, dd);
 
-    // 
+    // æ™‚åˆ»
     if (time > 0) {
         int hh = time >> 11;
         int min = (time >> 5) & 0x3f;
@@ -151,31 +151,31 @@ static void suica_dump_history(uint8 *data)
         _tprintf(_T(" %02d:%02d "), hh, min);
     }
     
-    _tprintf(_T("“ü:%x/%x "), in_line, in_sta);
+    _tprintf(_T("å…¥:%x/%x "), in_line, in_sta);
     if (out_line != -1) {
-        _tprintf(_T("o:%x/%x "), out_line, out_sta);
+        _tprintf(_T("å‡º:%x/%x "), out_line, out_sta);
     }
 
-    _tprintf(_T("c‚:%d "), balance);
-    _tprintf(_T("˜A”Ô:%d\n"), seq);
+    _tprintf(_T("æ®‹é«˜:%d "), balance);
+    _tprintf(_T("é€£ç•ª:%d\n"), seq);
 }
 
 static LPCTSTR consoleType(int ctype)
 {
     switch (ctype) {
-    case 0x03: return (LPCTSTR)_T("´Z‹@");
-    case 0x05: return (LPCTSTR)_T("ÔÚ’[––");
-    case 0x08: return (LPCTSTR)_T("Œ””„‹@");
-    case 0x12: return (LPCTSTR)_T("Œ””„‹@");
-    case 0x16: return (LPCTSTR)_T("‰üD‹@");
-    case 0x17: return (LPCTSTR)_T("ŠÈˆÕ‰üD‹@");
-    case 0x18: return (LPCTSTR)_T("‘‹Œû’[––");
-    case 0x1a: return (LPCTSTR)_T("‰üD’[––");
-    case 0x1b: return (LPCTSTR)_T("Œg‘Ñ“d˜b");
-    case 0x1c: return (LPCTSTR)_T("æŒp´Z‹@");
-    case 0x1d: return (LPCTSTR)_T("˜A—‰üD‹@");
-    case 0xc7: return (LPCTSTR)_T("•¨”Ì");
-    case 0xc8: return (LPCTSTR)_T("©”Ì‹@");
+    case 0x03: return (LPCTSTR)_T("æ¸…ç®—æ©Ÿ");
+    case 0x05: return (LPCTSTR)_T("è»Šè¼‰ç«¯æœ«");
+    case 0x08: return (LPCTSTR)_T("åˆ¸å£²æ©Ÿ");
+    case 0x12: return (LPCTSTR)_T("åˆ¸å£²æ©Ÿ");
+    case 0x16: return (LPCTSTR)_T("æ”¹æœ­æ©Ÿ");
+    case 0x17: return (LPCTSTR)_T("ç°¡æ˜“æ”¹æœ­æ©Ÿ");
+    case 0x18: return (LPCTSTR)_T("çª“å£ç«¯æœ«");
+    case 0x1a: return (LPCTSTR)_T("æ”¹æœ­ç«¯æœ«");
+    case 0x1b: return (LPCTSTR)_T("æºå¸¯é›»è©±");
+    case 0x1c: return (LPCTSTR)_T("ä¹—ç¶™æ¸…ç®—æ©Ÿ");
+    case 0x1d: return (LPCTSTR)_T("é€£çµ¡æ”¹æœ­æ©Ÿ");
+    case 0xc7: return (LPCTSTR)_T("ç‰©è²©");
+    case 0xc8: return (LPCTSTR)_T("è‡ªè²©æ©Ÿ");
     }
     return (LPCTSTR)_T("???");
 }
@@ -183,17 +183,17 @@ static LPCTSTR consoleType(int ctype)
 static LPCTSTR procType(int proc)
 {
     switch (proc) {
-    case 0x01: return (LPCTSTR)_T("‰^’Àx•¥");
-    case 0x02: return (LPCTSTR)_T("ƒ`ƒƒ[ƒW");
-    case 0x03: return (LPCTSTR)_T("Œ”w");
-    case 0x04: return (LPCTSTR)_T("´Z");
-    case 0x07: return (LPCTSTR)_T("V‹K");
-    case 0x0d: return (LPCTSTR)_T("ƒoƒX");
-    case 0x0f: return (LPCTSTR)_T("ƒoƒX");
-    case 0x14: return (LPCTSTR)_T("ƒI[ƒgƒ`ƒƒ[ƒW");
-    case 0x46: return (LPCTSTR)_T("•¨”Ì");
-    case 0x49: return (LPCTSTR)_T("“ü‹à");
-    case 0xc6: return (LPCTSTR)_T("•¨”Ì(Œ»‹à•¹—p)");
+    case 0x01: return (LPCTSTR)_T("é‹è³ƒæ”¯æ‰•");
+    case 0x02: return (LPCTSTR)_T("ãƒãƒ£ãƒ¼ã‚¸");
+    case 0x03: return (LPCTSTR)_T("åˆ¸è³¼");
+    case 0x04: return (LPCTSTR)_T("æ¸…ç®—");
+    case 0x07: return (LPCTSTR)_T("æ–°è¦");
+    case 0x0d: return (LPCTSTR)_T("ãƒã‚¹");
+    case 0x0f: return (LPCTSTR)_T("ãƒã‚¹");
+    case 0x14: return (LPCTSTR)_T("ã‚ªãƒ¼ãƒˆãƒãƒ£ãƒ¼ã‚¸");
+    case 0x46: return (LPCTSTR)_T("ç‰©è²©");
+    case 0x49: return (LPCTSTR)_T("å…¥é‡‘");
+    case 0xc6: return (LPCTSTR)_T("ç‰©è²©(ç¾é‡‘ä½µç”¨)");
     }
     return (LPCTSTR)_T("???");
 }

@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  felicalib - FeliCa access wrapper library
 
  Copyright (c) 2007, Takuya Murakami, All rights reserved.
@@ -33,7 +33,7 @@
 /**
   @file edy.c
 
-  edy —š—ğƒ_ƒ“ƒv
+  edy å±¥æ­´ãƒ€ãƒ³ãƒ—
 */
 
 #include <stdio.h>
@@ -49,7 +49,7 @@ static void analyzeTime(int n, struct tm *t);
 static int read4b(uint8 *p);
 static int read2b(uint8 *p);
 
-// ƒT[ƒrƒXƒR[ƒh
+// ã‚µãƒ¼ãƒ“ã‚¹ã‚³ãƒ¼ãƒ‰
 #define SERVICE_EDY     0x170f
 
 
@@ -104,13 +104,13 @@ static void edy_dump(uint8 *data)
     struct  tm tt;
 
     v = read4b(data + 0);
-    proc = v >> 24;         // ˆ—
-    seq  = v & 0xffffff;        // ˜A”Ô
-    time = read4b(data + 4);    // 
-    value = read4b(data + 8);   // ‹àŠz
-    balance = read4b(data + 12);    // c‚        
+    proc = v >> 24;         // å‡¦ç†
+    seq  = v & 0xffffff;        // é€£ç•ª
+    time = read4b(data + 4);    // æ™‚åˆ»
+    value = read4b(data + 8);   // é‡‘é¡
+    balance = read4b(data + 12);    // æ®‹é«˜        
 
-    // “ú•t/
+    // æ—¥ä»˜/æ™‚åˆ»
     analyzeTime(time, &tt);
     _tprintf(_T("%d/%02d/%02d %02d:%02d:%02d "),
         tt.tm_year, tt.tm_mon, tt.tm_mday,
@@ -119,22 +119,22 @@ static void edy_dump(uint8 *data)
     switch (proc)
     {
         case 0x02:
-            _tprintf(_T("ƒ`ƒƒ[ƒW "));
+            _tprintf(_T("ãƒãƒ£ãƒ¼ã‚¸ "));
             break;
         case 0x20:
-            _tprintf(_T("x•¥‚¢   "));
+            _tprintf(_T("æ”¯æ‰•ã„   "));
             break;
         case 0x04:
-            _tprintf(_T("ƒMƒtƒg   "));
+            _tprintf(_T("ã‚®ãƒ•ãƒˆ   "));
             break;
         default:
             _tprintf(_T("????     "));
             break;
     }
 
-    _tprintf(_T("‹àŠz:%-5d "), value);
-    _tprintf(_T("c‚:%-5d "), balance);
-    _tprintf(_T("˜A”Ô:%d\n"), seq);
+    _tprintf(_T("é‡‘é¡:%-5d "), value);
+    _tprintf(_T("æ®‹é«˜:%-5d "), balance);
+    _tprintf(_T("é€£ç•ª:%d\n"), seq);
 }
 
 static void analyzeTime(int n, struct tm *t)

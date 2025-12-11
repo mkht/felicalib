@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  felicalib - FeliCa access wrapper library
 
  Copyright (c) 2007-2010, Takuya Murakami, All rights reserved.
@@ -44,7 +44,7 @@ using System.Reflection;
 namespace FelicaLib
 {
     /// <summary>
-    /// DLL’x‰„ƒoƒCƒ“ƒfƒBƒ“ƒOƒNƒ‰ƒX
+    /// DLLé…å»¶ãƒã‚¤ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ã‚¯ãƒ©ã‚¹
     /// </summary>
     public class BindDLL : IDisposable
     {
@@ -58,9 +58,9 @@ namespace FelicaLib
         private IntPtr _pModule;
 
         /// <summary>
-        /// DLL‚Ìƒ[ƒhEƒIƒuƒWƒFƒNƒg¶¬
+        /// DLLã®ãƒ­ãƒ¼ãƒ‰ãƒ»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”Ÿæˆ
         /// </summary>
-        /// <param name="szFilename">ƒoƒCƒ“ƒh‚·‚éDLL–¼</param>
+        /// <param name="szFilename">ãƒã‚¤ãƒ³ãƒ‰ã™ã‚‹DLLå</param>
         public BindDLL(string szFilename)
         {
             _pModule = BindDLL.LoadLibrary(szFilename);
@@ -73,11 +73,11 @@ namespace FelicaLib
         }
 
         /// <summary>
-        /// w’è–¼‚ÌƒAƒ“ƒ}ƒl[ƒWŠÖ”ƒ|ƒCƒ“ƒ^‚ğƒfƒŠƒQ[ƒg‚É•ÏŠ·
+        /// æŒ‡å®šåã®ã‚¢ãƒ³ãƒãƒãƒ¼ã‚¸é–¢æ•°ãƒã‚¤ãƒ³ã‚¿ã‚’ãƒ‡ãƒªã‚²ãƒ¼ãƒˆã«å¤‰æ›
         /// </summary>
-        /// <param name="szProcName">ƒAƒ“ƒ}ƒl[ƒWŠÖ”–¼</param>
-        /// <param name="typDelegate">•ÏŠ·‚·‚éƒfƒŠƒQ[ƒg‚ÌType</param>
-        /// <returns>•ÏŠ·‚µ‚½ƒfƒŠƒQ[ƒg</returns>
+        /// <param name="szProcName">ã‚¢ãƒ³ãƒãƒãƒ¼ã‚¸é–¢æ•°å</param>
+        /// <param name="typDelegate">å¤‰æ›ã™ã‚‹ãƒ‡ãƒªã‚²ãƒ¼ãƒˆã®Type</param>
+        /// <returns>å¤‰æ›ã—ãŸãƒ‡ãƒªã‚²ãƒ¼ãƒˆ</returns>
         public Delegate GetDelegate(string szProcName, Type typDelegate)
         {
             IntPtr pProc = BindDLL.GetProcAddress(_pModule, szProcName);
@@ -90,7 +90,7 @@ namespace FelicaLib
             throw Marshal.GetExceptionForHR(nResult);
         }
 
-        #region IDisposable ƒƒ“ƒo
+        #region IDisposable ãƒ¡ãƒ³ãƒ
 
         public void Dispose()
         {
@@ -103,21 +103,21 @@ namespace FelicaLib
         #endregion
     }
 
-    // ƒVƒXƒeƒ€ƒR[ƒh
+    // ã‚·ã‚¹ãƒ†ãƒ ã‚³ãƒ¼ãƒ‰
     enum SystemCode : int
     {
         Any = 0xffff,           // ANY
-        Common = 0xfe00,        // ‹¤’Ê—Ìˆæ
-        Cyberne = 0x0003,       // ƒTƒCƒoƒl—Ìˆæ
+        Common = 0xfe00,        // å…±é€šé ˜åŸŸ
+        Cyberne = 0x0003,       // ã‚µã‚¤ãƒãƒé ˜åŸŸ
 
-        Edy = 0xfe00,           // Edy (=‹¤’Ê—Ìˆæ)
-        Suica = 0x0003,         // Suica (=ƒTƒCƒoƒl—Ìˆæ)
+        Edy = 0xfe00,           // Edy (=å…±é€šé ˜åŸŸ)
+        Suica = 0x0003,         // Suica (=ã‚µã‚¤ãƒãƒé ˜åŸŸ)
         QUICPay = 0x04c1,       // QUICPay
     }
 
     public class Felica : IDisposable
     {
-        // ’x‰„ƒ[ƒh—pDelegate’è‹`
+        // é…å»¶ãƒ­ãƒ¼ãƒ‰ç”¨Delegateå®šç¾©
         private delegate IntPtr Pasori_open(String dummy);
         private delegate int Pasori_close(IntPtr p);
         private delegate int Pasori_init(IntPtr p);
@@ -127,7 +127,7 @@ namespace FelicaLib
         private delegate void Felica_getpmm(IntPtr f, byte[] data);
         private delegate int Felica_read_without_encryption02(IntPtr f, int servicecode, int mode, byte addr, byte[] data);
 
-        // ’x‰„ƒ[ƒh—pDelegate
+        // é…å»¶ãƒ­ãƒ¼ãƒ‰ç”¨Delegate
         private Pasori_open pasori_open = null;
         private Pasori_close pasori_close = null;
         private Pasori_init pasori_init = null;
@@ -144,14 +144,14 @@ namespace FelicaLib
         private IntPtr felicap = IntPtr.Zero;
 
         /// <summary>
-        /// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+        /// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         /// </summary>
         public Felica()
         {
-            // x64‘Î‰ 20100501 - DeForest
+            // x64å¯¾å¿œ 20100501 - DeForest
             try
             {
-                // ƒvƒ‰ƒbƒgƒtƒH[ƒ€•Ê‚Ìƒ[ƒhƒ‚ƒWƒ…[ƒ‹–¼Œˆ’èix64/x86ƒTƒ|[ƒgAItenium‚ÍƒTƒ|[ƒgŠOj
+                // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ åˆ¥ã®ãƒ­ãƒ¼ãƒ‰ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«åæ±ºå®šï¼ˆx64/x86ã‚µãƒãƒ¼ãƒˆã€Iteniumã¯ã‚µãƒãƒ¼ãƒˆå¤–ï¼‰
                 if (System.IntPtr.Size >= 8)    // x64
                 {
                     szDLLname = "felicalib64.dll";
@@ -160,9 +160,9 @@ namespace FelicaLib
                 {
                     szDLLname = "felicalib.dll";
                 }
-                // DLLƒ[ƒh
+                // DLLãƒ­ãƒ¼ãƒ‰
                 bdDLL = new BindDLL(szDLLname);
-                // ƒGƒ“ƒgƒŠ[æ“¾
+                // ã‚¨ãƒ³ãƒˆãƒªãƒ¼å–å¾—
                 pasori_open = (Pasori_open)bdDLL.GetDelegate("pasori_open", typeof(Pasori_open));
                 pasori_close = (Pasori_close)bdDLL.GetDelegate("pasori_close", typeof(Pasori_close));
                 pasori_init = (Pasori_init)bdDLL.GetDelegate("pasori_init", typeof(Pasori_init));
@@ -174,24 +174,24 @@ namespace FelicaLib
             }
             catch (Exception)
             {
-                throw new Exception(szDLLname + " ‚ğƒ[ƒh‚Å‚«‚Ü‚¹‚ñ");
+                throw new Exception(szDLLname + " ã‚’ãƒ­ãƒ¼ãƒ‰ã§ãã¾ã›ã‚“");
             }
 
             pasorip = pasori_open(null);
             if (pasorip == IntPtr.Zero)
             {
-                throw new Exception(szDLLname + " ‚ğŠJ‚¯‚Ü‚¹‚ñ");
+                throw new Exception(szDLLname + " ã‚’é–‹ã‘ã¾ã›ã‚“");
             }
             if (pasori_init(pasorip) != 0)
             {
-                throw new Exception("PaSoRi ‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñ");
+                throw new Exception("PaSoRi ã«æ¥ç¶šã§ãã¾ã›ã‚“");
             }
         }
 
-        #region IDisposable ƒƒ“ƒo
+        #region IDisposable ãƒ¡ãƒ³ãƒ
 
         /// <summary>
-        /// ƒIƒuƒWƒFƒNƒg”jŠüˆ—
+        /// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç ´æ£„æ™‚å‡¦ç†
         /// </summary>
         public void Dispose()
         {
@@ -209,7 +209,7 @@ namespace FelicaLib
         #endregion
 
         /// <summary>
-        /// ƒfƒXƒgƒ‰ƒNƒ^
+        /// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         /// </summary>
         ~Felica()
         {
@@ -217,9 +217,9 @@ namespace FelicaLib
         }
 
         /// <summary>
-        /// ƒ|[ƒŠƒ“ƒO
+        /// ãƒãƒ¼ãƒªãƒ³ã‚°
         /// </summary>
-        /// <param name="systemcode">ƒVƒXƒeƒ€ƒR[ƒh</param>
+        /// <param name="systemcode">ã‚·ã‚¹ãƒ†ãƒ ã‚³ãƒ¼ãƒ‰</param>
         public void Polling(int systemcode)
         {
             felica_free(felicap);
@@ -227,14 +227,14 @@ namespace FelicaLib
             felicap = felica_polling(pasorip, (ushort)systemcode, 0, 0);
             if (felicap == IntPtr.Zero)
             {
-                throw new Exception("ƒJ[ƒh“Ç‚İæ‚è¸”s");
+                throw new Exception("ã‚«ãƒ¼ãƒ‰èª­ã¿å–ã‚Šå¤±æ•—");
             }
         }
 
         /// <summary>
-        /// IDmæ“¾
+        /// IDmå–å¾—
         /// </summary>
-        /// <returns>IDmƒoƒCƒiƒŠƒf[ƒ^</returns>
+        /// <returns>IDmãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿</returns>
         public byte[] IDm()
         {
             if (felicap == IntPtr.Zero)
@@ -248,9 +248,9 @@ namespace FelicaLib
         }    
 
         /// <summary>
-        /// PMmæ“¾
+        /// PMmå–å¾—
         /// </summary>
-        /// <returns>PMmƒoƒCƒiƒŠƒf[ƒ^</returns>
+        /// <returns>PMmãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿</returns>
         public byte[] PMm()
         {
             if (felicap == IntPtr.Zero)
@@ -264,11 +264,11 @@ namespace FelicaLib
         }    
 
         /// <summary>
-        /// ”ñˆÃ†‰»—Ìˆæ“Ç‚İ‚İ
+        /// éæš—å·åŒ–é ˜åŸŸèª­ã¿è¾¼ã¿
         /// </summary>
-        /// <param name="servicecode">ƒT[ƒrƒXƒR[ƒh</param>
-        /// <param name="addr">ƒAƒhƒŒƒX</param>
-        /// <returns>ƒf[ƒ^</returns>
+        /// <param name="servicecode">ã‚µãƒ¼ãƒ“ã‚¹ã‚³ãƒ¼ãƒ‰</param>
+        /// <param name="addr">ã‚¢ãƒ‰ãƒ¬ã‚¹</param>
+        /// <returns>ãƒ‡ãƒ¼ã‚¿</returns>
         public byte[] ReadWithoutEncryption(int servicecode, int addr)
         {
             if (felicap == IntPtr.Zero)
