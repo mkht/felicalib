@@ -78,7 +78,7 @@ typedef struct {
     uint8 *block_data;                  ///< 書き込みデータ(16byte)
 } INSTR_WRITE_BLOCK;                        
 
-/** @brief read_block_without_encryption 出力構造体 */
+/** @brief write_block_without_encryption 出力構造体 */
 typedef struct {
     uint8 *status_flag_1;
     uint8 *status_flag_2;
