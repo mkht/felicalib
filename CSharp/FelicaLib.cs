@@ -13,6 +13,36 @@ namespace FelicaLib
         QUICPay = 0x04c1,       // QUICPay
     }
 
+    /// <summary>
+    /// felicalib.hで定義されているstrfelica構造体に対応するC#構造体
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct StrFelica
+    {
+        public IntPtr p;            // pasori ハンドル
+        public ushort systemcode;   // システムコード
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] IDm;          // IDm
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public byte[] PMm;          // PMm
+
+        // systemcode
+        public byte num_system_code;            // 列挙システムコード数
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        public ushort[] system_code;            // 列挙システムコード
+
+        // area/service codes
+        public byte num_area_code;              // エリアコード数
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public ushort[] area_code;              // エリアコード
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public ushort[] end_service_code;       // エンドサービスコード
+
+        public byte num_service_code;           // サービスコード数
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public ushort[] service_code;           // サービスコード
+    }
+
 	internal static partial class NativeMethods
 	{
 		private const string DllName = "felicalib.dll";
@@ -66,6 +96,7 @@ namespace FelicaLib
 	{
 		private IntPtr _pasori = IntPtr.Zero;
 		private IntPtr _felica = IntPtr.Zero;
+		private StrFelica? _felicaStructure = null;
 		private bool _disposed = false;
 
 		// constructor
@@ -102,6 +133,9 @@ namespace FelicaLib
             {
                 throw new InvalidOperationException("felica_polling failed");
             }
+
+            // felica構造体を取得
+            _felicaStructure = Marshal.PtrToStructure<StrFelica>(_felica);
         }
 
 		// felica_read_without_encryption02
@@ -138,39 +172,78 @@ namespace FelicaLib
 			{
 				NativeMethods.felica_free(_felica);
 				_felica = IntPtr.Zero;
+				_felicaStructure = null;
 			}
 		}
 
 		// felica_getidm
 		public byte[] GetIdm()
 		{
-			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
-			var buf = new byte[8];
-			NativeMethods.felica_getidm(_felica, buf);
-			return buf;
+			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
+			return _felicaStructure.Value.IDm;
 		}
 
 		// felica_getpmm
 		public byte[] GetPmm()
 		{
-			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
-			var buf = new byte[8];
-			NativeMethods.felica_getpmm(_felica, buf);
-			return buf;
+			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
+			return _felicaStructure.Value.PMm;
 		}
 
 		// felica_enum_systemcode
-		public static IntPtr EnumSystemCode(IntPtr pasoriHandle)
+		public ushort[] EnumSystemCode()
 		{
-			if (pasoriHandle == IntPtr.Zero) throw new ArgumentNullException(nameof(pasoriHandle));
-			return NativeMethods.felica_enum_systemcode(pasoriHandle);
+			if (_pasori == IntPtr.Zero) throw new InvalidOperationException("pasori handle is not initialized.");
+
+			// 既存の_felicaがあれば解放
+			FreeFelica();
+
+			IntPtr f = NativeMethods.felica_enum_systemcode(_pasori);
+			if (f == IntPtr.Zero)
+			{
+				throw new InvalidOperationException("felica_enum_systemcode failed");
+			}
+
+			// 取得した felica 構造体を読み込み、インスタンスフィールドを更新
+			var sf = Marshal.PtrToStructure<StrFelica>(f);
+			_felica = f;
+			_felicaStructure = sf;
+
+			// num_system_code に基づいて配列を切り出して返す
+			int count = sf.num_system_code;
+			if (count <= 0) return [];
+			if (sf.system_code == null) return [];
+
+			ushort[] result = new ushort[count];
+			Array.Copy(sf.system_code, result, Math.Min(count, sf.system_code.Length));
+			return result;
 		}
 
 		// felica_enum_service
-		public static IntPtr EnumService(IntPtr pasoriHandle, ushort systemcode)
+		public ushort[] EnumService(ushort systemcode)
 		{
-			if (pasoriHandle == IntPtr.Zero) throw new ArgumentNullException(nameof(pasoriHandle));
-			return NativeMethods.felica_enum_service(pasoriHandle, systemcode);
+			if (_pasori == IntPtr.Zero) throw new InvalidOperationException("pasori handle is not initialized.");
+
+			// 既存の_felicaがあれば解放
+			FreeFelica();
+
+			IntPtr f = NativeMethods.felica_enum_service(_pasori, systemcode);
+			if (f == IntPtr.Zero)
+			{
+				throw new InvalidOperationException("felica_enum_service failed");
+			}
+
+			var sf = Marshal.PtrToStructure<StrFelica>(f);
+			_felica = f;
+			_felicaStructure = sf;
+
+			int count = sf.num_service_code;
+			if (count <= 0) return [];
+			if (sf.service_code == null) return [];
+
+			ushort[] result = new ushort[count];
+			Array.Copy(sf.service_code, result, Math.Min(count, sf.service_code.Length));
+			return result;
 		}
 
 		// IDisposable
