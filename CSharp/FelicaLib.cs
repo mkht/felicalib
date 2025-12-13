@@ -13,42 +13,53 @@ namespace FelicaLib
         QUICPay = 0x04c1,       // QUICPay
     }
 
-	internal static class NativeMethods
+	internal static partial class NativeMethods
 	{
 		private const string DllName = "felicalib.dll";
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-		internal static extern IntPtr pasori_open(string dummy);
+		[LibraryImport(DllName, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial IntPtr pasori_open(string dummy);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void pasori_close(IntPtr p);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial void pasori_close(IntPtr p);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern int pasori_init(IntPtr p);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial int pasori_init(IntPtr p);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern IntPtr felica_polling(IntPtr p, ushort systemcode, byte RFU, byte timeslot);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial IntPtr felica_polling(IntPtr p, ushort systemcode, byte RFU, byte timeslot);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern int felica_read_without_encryption02(IntPtr f, int servicecode, int mode, byte addr, [Out] byte[] data);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial int felica_read_without_encryption02(IntPtr f, int servicecode, int mode, byte addr, [Out] byte[] data);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern int felica_write_without_encryption(IntPtr f, int servicecode, byte addr, byte[] data);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial int felica_write_without_encryption(IntPtr f, int servicecode, byte addr, byte[] data);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void felica_free(IntPtr f);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial void felica_free(IntPtr f);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void felica_getidm(IntPtr f, [Out] byte[] buf);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial void felica_getidm(IntPtr f, [Out] byte[] buf);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern void felica_getpmm(IntPtr f, [Out] byte[] buf);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial void felica_getpmm(IntPtr f, [Out] byte[] buf);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern IntPtr felica_enum_systemcode(IntPtr p);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial IntPtr felica_enum_systemcode(IntPtr p);
 
-		[DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-		internal static extern IntPtr felica_enum_service(IntPtr p, ushort systemcode);
+		[LibraryImport(DllName)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        internal static partial IntPtr felica_enum_service(IntPtr p, ushort systemcode);
 	}
 
 	public class Felica : IDisposable
