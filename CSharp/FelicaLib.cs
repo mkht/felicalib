@@ -44,14 +44,14 @@ using System.Runtime.InteropServices;
 
 namespace FelicaLib
 {
-	// システムコード
+    // システムコード
     enum SystemCode : ushort
     {
-        Any     = 0xffff,       // ANY
-        Common  = 0xfe00,       // 共通領域
+        Any = 0xffff,       // ANY
+        Common = 0xfe00,       // 共通領域
         Cyberne = 0x0003,       // サイバネ領域
-        Edy     = 0xfe00,       // Edy (=共通領域)
-        Suica   = 0x0003,       // Suica (=サイバネ領域)
+        Edy = 0xfe00,       // Edy (=共通領域)
+        Suica = 0x0003,       // Suica (=サイバネ領域)
         QUICPay = 0x04c1,       // QUICPay
     }
 
@@ -85,98 +85,98 @@ namespace FelicaLib
         public ushort[] service_code;           // サービスコード
     }
 
-	// ネイティブメソッド P/Invoke 宣言
-	internal static partial class NativeMethods
-	{
-		private const string DllName = "felicalib.dll";
+    // ネイティブメソッド P/Invoke 宣言
+    internal static partial class NativeMethods
+    {
+        private const string DllName = "felicalib.dll";
 
-		[LibraryImport(DllName, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
+        [LibraryImport(DllName, StringMarshalling = StringMarshalling.Custom, StringMarshallingCustomType = typeof(System.Runtime.InteropServices.Marshalling.AnsiStringMarshaller))]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial IntPtr pasori_open(string dummy);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial void pasori_close(IntPtr p);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial int pasori_init(IntPtr p);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial IntPtr felica_polling(IntPtr p, ushort systemcode, byte RFU, byte timeslot);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial int felica_read_without_encryption02(IntPtr f, int servicecode, int mode, byte addr, [Out] byte[] data);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial int felica_write_without_encryption(IntPtr f, int servicecode, byte addr, byte[] data);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial void felica_free(IntPtr f);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial void felica_getidm(IntPtr f, [Out] byte[] buf);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial void felica_getpmm(IntPtr f, [Out] byte[] buf);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial IntPtr felica_enum_systemcode(IntPtr p);
 
-		[LibraryImport(DllName)]
+        [LibraryImport(DllName)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         internal static partial IntPtr felica_enum_service(IntPtr p, ushort systemcode);
-	}
+    }
 
-	// Felicaクラス
-	public class Felica : IDisposable
-	{
-		private IntPtr _pasori = IntPtr.Zero;
-		private IntPtr _felica = IntPtr.Zero;
-		private StrFelica? _felicaStructure = null;
-		private bool _disposed = false;
+    // Felicaクラス
+    public class Felica : IDisposable
+    {
+        private IntPtr _pasori = IntPtr.Zero;
+        private IntPtr _felica = IntPtr.Zero;
+        private StrFelica? _felicaStructure = null;
+        private bool _disposed = false;
 
-		public byte[]? IDm { get; private set; }
-		public byte[]? PMm { get; private set; }
+        public byte[]? IDm { get; private set; }
+        public byte[]? PMm { get; private set; }
 
-		/// <summary>
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-		public Felica()
-		{
-			_pasori = NativeMethods.pasori_open(null);
-			if (_pasori == IntPtr.Zero)
-			{
-				throw new InvalidOperationException("PaSori open failed.");
-			}
+        public Felica()
+        {
+            _pasori = NativeMethods.pasori_open(null);
+            if (_pasori == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("PaSori open failed.");
+            }
             if (NativeMethods.pasori_init(_pasori) != 0)
             {
                 PasoriClose();
                 throw new InvalidOperationException("Could not connect to PaSori.");
             }
-		}
+        }
 
-		// pasori_close
-		private void PasoriClose()
-		{
-			if (_pasori != IntPtr.Zero)
-			{
-				NativeMethods.pasori_close(_pasori);
-				_pasori = IntPtr.Zero;
-			}
-		}
+        // pasori_close
+        private void PasoriClose()
+        {
+            if (_pasori != IntPtr.Zero)
+            {
+                NativeMethods.pasori_close(_pasori);
+                _pasori = IntPtr.Zero;
+            }
+        }
 
-		/// <summary>
-		/// ポーリング, Felica基本情報取得
-		/// </summary>
-		/// <param name="systemcode">システムコード</param>
+        /// <summary>
+        /// ポーリング, Felica基本情報取得
+        /// </summary>
+        /// <param name="systemcode">システムコード</param>
         public void Polling(ushort systemcode)
         {
             FreeFelica();
@@ -188,202 +188,202 @@ namespace FelicaLib
 
             // felica構造体を取得
             _felicaStructure = Marshal.PtrToStructure<StrFelica>(_felica);
-			IDm = _felicaStructure.Value.IDm;
-			PMm = _felicaStructure.Value.PMm;
+            IDm = _felicaStructure.Value.IDm;
+            PMm = _felicaStructure.Value.PMm;
         }
 
-		/// オーバーロード: システムコード ANY 指定
+        /// オーバーロード: システムコード ANY 指定
         public void Polling()
-		{
-			Polling((ushort)SystemCode.Any);
-		}
+        {
+            Polling((ushort)SystemCode.Any);
+        }
 
-		/// <summary>
-		/// 非暗号化領域読み込み
-		/// </summary>
-		/// <param name="servicecode">サービスコード</param>
-		/// <param name="addr">ブロックアドレス</param>
-		/// <returns>読み取りデータ(16バイト) or null (失敗時)</returns>
-		public byte[] ReadWithoutEncryption(int servicecode, byte addr)
-		{
-			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
-			var data = new byte[16];
-			if (NativeMethods.felica_read_without_encryption02(_felica, servicecode, 0, addr, data) != 0)
-			{
-				return null;
-			}
-			return data;
-		}
+        /// <summary>
+        /// 非暗号化領域読み込み
+        /// </summary>
+        /// <param name="servicecode">サービスコード</param>
+        /// <param name="addr">ブロックアドレス</param>
+        /// <returns>読み取りデータ(16バイト) or null (失敗時)</returns>
+        public byte[] ReadWithoutEncryption(int servicecode, byte addr)
+        {
+            if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
+            var data = new byte[16];
+            if (NativeMethods.felica_read_without_encryption02(_felica, servicecode, 0, addr, data) != 0)
+            {
+                return null;
+            }
+            return data;
+        }
 
-		/// <summary>
-		/// 非暗号化領域書き込み
-		/// </summary>
-		/// <param name="servicecode">サービスコード</param>
-		/// <param name="addr">ブロックアドレス</param>
-		/// <param name="data">書き込みデータ(最大16バイト)</param>
-		/// <returns>書き込みに成功した場合は0</returns>
-		public int WriteWithoutEncryption(int servicecode, byte addr, byte[] data)
-		{
+        /// <summary>
+        /// 非暗号化領域書き込み
+        /// </summary>
+        /// <param name="servicecode">サービスコード</param>
+        /// <param name="addr">ブロックアドレス</param>
+        /// <param name="data">書き込みデータ(最大16バイト)</param>
+        /// <returns>書き込みに成功した場合は0</returns>
+        public int WriteWithoutEncryption(int servicecode, byte addr, byte[] data)
+        {
             ArgumentNullException.ThrowIfNull(data);
             if (data.Length > 16) throw new ArgumentException("data buffer must not exceed 16 bytes", nameof(data));
-			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
-			byte[] writeData = data;
-			if (data.Length < 16)
-			{
-				writeData = new byte[16];
-				Array.Copy(data, writeData, data.Length);
-			}
-			return NativeMethods.felica_write_without_encryption(_felica, servicecode, addr, writeData);
-		}
+            if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
+            byte[] writeData = data;
+            if (data.Length < 16)
+            {
+                writeData = new byte[16];
+                Array.Copy(data, writeData, data.Length);
+            }
+            return NativeMethods.felica_write_without_encryption(_felica, servicecode, addr, writeData);
+        }
 
-		// Felica解放
-		private void FreeFelica()
-		{
-			if (_felica != IntPtr.Zero)
-			{
-				NativeMethods.felica_free(_felica);
-				_felica = IntPtr.Zero;
-				_felicaStructure = null;
-				IDm = null;
-				PMm = null;
-			}
-		}
+        // Felica解放
+        private void FreeFelica()
+        {
+            if (_felica != IntPtr.Zero)
+            {
+                NativeMethods.felica_free(_felica);
+                _felica = IntPtr.Zero;
+                _felicaStructure = null;
+                IDm = null;
+                PMm = null;
+            }
+        }
 
-		/// <summary>
+        /// <summary>
         /// IDm取得
         /// </summary>
         /// <returns>IDmバイナリデータ</returns>
-		public byte[] GetIdm()
-		{
-			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
-			IDm = _felicaStructure.Value.IDm;
-			return IDm;
-		}
+        public byte[] GetIdm()
+        {
+            if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
+            IDm = _felicaStructure.Value.IDm;
+            return IDm;
+        }
 
-		/// <summary>
+        /// <summary>
         /// PMm取得
         /// </summary>
         /// <returns>PMmバイナリデータ</returns
-		public byte[] GetPMm()
-		{
-			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
-			PMm = _felicaStructure.Value.PMm;
-			return PMm;
-		}
+        public byte[] GetPMm()
+        {
+            if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
+            PMm = _felicaStructure.Value.PMm;
+            return PMm;
+        }
 
-		/// <summary>
-		/// システムコード列挙
-		/// </summary>
-		/// <returns>システムコード配列</returns>
-		public ushort[] EnumSystemCode()
-		{
-			FreeFelica();
-			IntPtr f = NativeMethods.felica_enum_systemcode(_pasori);
-			if (f == IntPtr.Zero)
-			{
-				throw new InvalidOperationException("Failed to enumerate system codes.");
-			}
+        /// <summary>
+        /// システムコード列挙
+        /// </summary>
+        /// <returns>システムコード配列</returns>
+        public ushort[] EnumSystemCode()
+        {
+            FreeFelica();
+            IntPtr f = NativeMethods.felica_enum_systemcode(_pasori);
+            if (f == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to enumerate system codes.");
+            }
 
-			// 取得した felica 構造体を読み込み、インスタンスフィールドを更新
-			var sf = Marshal.PtrToStructure<StrFelica>(f);
-			_felica = f;
-			_felicaStructure = sf;
-			// IDmがすべて0の場合、サービスコードが取得できなかったと判断
-			if (sf.IDm.All(b => b == 0))
-			{
-				FreeFelica();
-				throw new InvalidOperationException("Failed to retrieve system codes.");
-			}
+            // 取得した felica 構造体を読み込み、インスタンスフィールドを更新
+            var sf = Marshal.PtrToStructure<StrFelica>(f);
+            _felica = f;
+            _felicaStructure = sf;
+            // IDmがすべて0の場合、サービスコードが取得できなかったと判断
+            if (sf.IDm.All(b => b == 0))
+            {
+                FreeFelica();
+                throw new InvalidOperationException("Failed to retrieve system codes.");
+            }
 
-			// num_system_code に基づいて配列を切り出して返す
-			int count = sf.num_system_code;
-			if (count > 8)
-			{
-				throw new InvalidOperationException("Failed to retrieve system codes.");
-			}
-			if (count <= 0) return [];
-			if (sf.system_code == null) return [];
-			ushort[] result = new ushort[count];
-			// felica_enum_systemcode で取得した system_code はバイトオーダーが逆なので変換する
-			for (int i = 0; i < result.Length; i++)
-			{
-				result[i] = (ushort)((sf.system_code[i] << 8) | (sf.system_code[i] >> 8));
-			}
-			IDm = sf.IDm;
-			PMm = sf.PMm;
-			return result;
-		}
+            // num_system_code に基づいて配列を切り出して返す
+            int count = sf.num_system_code;
+            if (count > 8)
+            {
+                throw new InvalidOperationException("Failed to retrieve system codes.");
+            }
+            if (count <= 0) return [];
+            if (sf.system_code == null) return [];
+            ushort[] result = new ushort[count];
+            // felica_enum_systemcode で取得した system_code はバイトオーダーが逆なので変換する
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = (ushort)((sf.system_code[i] << 8) | (sf.system_code[i] >> 8));
+            }
+            IDm = sf.IDm;
+            PMm = sf.PMm;
+            return result;
+        }
 
-		/// <summary>
-		/// サービスコード列挙
-		/// </summary>
-		/// <param name="systemcode">システムコード</param>
-		/// <returns>サービスコード配列</returns>
-		public ushort[] EnumServiceCode(ushort systemcode)
-		{
-			FreeFelica();
-			IntPtr f = NativeMethods.felica_enum_service(_pasori, systemcode);
-			if (f == IntPtr.Zero)
-			{
-				throw new InvalidOperationException("Failed to enumerate service codes.");
-			}
+        /// <summary>
+        /// サービスコード列挙
+        /// </summary>
+        /// <param name="systemcode">システムコード</param>
+        /// <returns>サービスコード配列</returns>
+        public ushort[] EnumServiceCode(ushort systemcode)
+        {
+            FreeFelica();
+            IntPtr f = NativeMethods.felica_enum_service(_pasori, systemcode);
+            if (f == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to enumerate service codes.");
+            }
 
-			var sf = Marshal.PtrToStructure<StrFelica>(f);
-			_felica = f;
-			_felicaStructure = sf;
-			// IDmがすべて0の場合、サービスコードが取得できなかったと判断
-			if (sf.IDm.All(b => b == 0))
-			{
-				FreeFelica();
-				throw new InvalidOperationException("Failed to retrieve service codes.");
-			}
+            var sf = Marshal.PtrToStructure<StrFelica>(f);
+            _felica = f;
+            _felicaStructure = sf;
+            // IDmがすべて0の場合、サービスコードが取得できなかったと判断
+            if (sf.IDm.All(b => b == 0))
+            {
+                FreeFelica();
+                throw new InvalidOperationException("Failed to retrieve service codes.");
+            }
 
-			int count = sf.num_service_code;
-			if (count > 256)
-			{
-				throw new InvalidOperationException("Failed to retrieve service codes.");
-			}
-			if (count <= 0) return [];
-			if (sf.service_code == null) return [];
+            int count = sf.num_service_code;
+            if (count > 256)
+            {
+                throw new InvalidOperationException("Failed to retrieve service codes.");
+            }
+            if (count <= 0) return [];
+            if (sf.service_code == null) return [];
 
-			ushort[] result = new ushort[count];
-			Array.Copy(sf.service_code, result, Math.Min(count, sf.service_code.Length));
+            ushort[] result = new ushort[count];
+            Array.Copy(sf.service_code, result, Math.Min(count, sf.service_code.Length));
 
-			IDm = sf.IDm;
-			PMm = sf.PMm;
-			return result;
-		}
+            IDm = sf.IDm;
+            PMm = sf.PMm;
+            return result;
+        }
 
-		// IDisposable
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+        // IDisposable
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_disposed) return;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
 
-			// アンマネージドリソースの解除
-			FreeFelica();
-			if (_pasori != IntPtr.Zero)
-			{
-				try
-				{
-					NativeMethods.pasori_close(_pasori);
-				}
-				catch { /* 無視 */ }
-				_pasori = IntPtr.Zero;
-			}
+            // アンマネージドリソースの解除
+            FreeFelica();
+            if (_pasori != IntPtr.Zero)
+            {
+                try
+                {
+                    NativeMethods.pasori_close(_pasori);
+                }
+                catch { /* 無視 */ }
+                _pasori = IntPtr.Zero;
+            }
 
-			_disposed = true;
-		}
+            _disposed = true;
+        }
 
-		// デストラクタ
-		~Felica()
-		{
-			Dispose(false);
-		}
-	}
+        // デストラクタ
+        ~Felica()
+        {
+            Dispose(false);
+        }
+    }
 }
