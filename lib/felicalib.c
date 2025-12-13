@@ -315,6 +315,9 @@ felica * felica_enum_systemcode(pasori *p)
     card_info.card_idm = f->IDm;
     card_info.card_pmm = f->PMm;
 
+    p->set_polling_timeout(200);
+    p->set_retry_count(5);
+
     irs.card_idm = f->IDm;
     
     ors.system_code_list = (uint8 *)f->system_code;
@@ -353,6 +356,9 @@ felica * felica_enum_service(pasori *p, uint16 systemcode)
 
     card_info.card_idm = f->IDm;
     card_info.card_pmm = f->PMm;
+
+    p->set_polling_timeout(200);
+    p->set_retry_count(5);
 
     iss.buffer_size_of_area_codes = MAX_AREA_CODE;
     iss.buffer_size_of_service_codes = MAX_SERVICE_CODE;
