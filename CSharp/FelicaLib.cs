@@ -1,8 +1,50 @@
-﻿using System;
+﻿/*
+ felicalib - FeliCa access wrapper library
+
+ Copyright (c) 2007-2010, Takuya Murakami, All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ 1. Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer. 
+
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution. 
+
+ 3. Neither the name of the project nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission. 
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+///
+/// Porting to x64 systems by DeForest(Hirokazu Hayashi)
+///
+
+/// 
+/// Re-written to .NET 8 Class Library by mkht
+///
+
+using System;
 using System.Runtime.InteropServices;
 
 namespace FelicaLib
 {
+	// システムコード
     enum SystemCode : ushort
     {
         Any     = 0xffff,       // ANY
@@ -43,6 +85,7 @@ namespace FelicaLib
         public ushort[] service_code;           // サービスコード
     }
 
+	// ネイティブメソッド P/Invoke 宣言
 	internal static partial class NativeMethods
 	{
 		private const string DllName = "felicalib.dll";
@@ -92,6 +135,7 @@ namespace FelicaLib
         internal static partial IntPtr felica_enum_service(IntPtr p, ushort systemcode);
 	}
 
+	// Felicaクラス
 	public class Felica : IDisposable
 	{
 		private IntPtr _pasori = IntPtr.Zero;
@@ -102,18 +146,20 @@ namespace FelicaLib
 		public byte[]? IDm { get; private set; }
 		public byte[]? PMm { get; private set; }
 
-		// constructor
+		/// <summary>
+        /// コンストラクタ
+        /// </summary>
 		public Felica()
 		{
 			_pasori = NativeMethods.pasori_open(null);
 			if (_pasori == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("pasori_open failed");
+				throw new InvalidOperationException("PaSori open failed.");
 			}
             if (NativeMethods.pasori_init(_pasori) != 0)
             {
                 PasoriClose();
-                throw new InvalidOperationException("pasori_init failed");
+                throw new InvalidOperationException("Could not connect to PaSori.");
             }
 		}
 
@@ -127,14 +173,17 @@ namespace FelicaLib
 			}
 		}
 
-		// felica_polling
+		/// <summary>
+		/// ポーリング, Felica基本情報取得
+		/// </summary>
+		/// <param name="systemcode">システムコード</param>
         public void Polling(ushort systemcode)
         {
             FreeFelica();
             _felica = NativeMethods.felica_polling(_pasori, systemcode, 0, 0);
             if (_felica == IntPtr.Zero)
             {
-                throw new InvalidOperationException("felica_polling failed");
+                throw new InvalidOperationException("Polling card failed.");
             }
 
             // felica構造体を取得
@@ -143,12 +192,18 @@ namespace FelicaLib
 			PMm = _felicaStructure.Value.PMm;
         }
 
+		/// オーバーロード: システムコード ANY 指定
         public void Polling()
 		{
 			Polling((ushort)SystemCode.Any);
 		}
 
-		// felica_read_without_encryption02
+		/// <summary>
+		/// 非暗号化領域読み込み
+		/// </summary>
+		/// <param name="servicecode">サービスコード</param>
+		/// <param name="addr">ブロックアドレス</param>
+		/// <returns>読み取りデータ(16バイト) or null (失敗時)</returns>
 		public byte[] ReadWithoutEncryption(int servicecode, byte addr)
 		{
 			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
@@ -160,7 +215,13 @@ namespace FelicaLib
 			return data;
 		}
 
-		// felica_write_without_encryption
+		/// <summary>
+		/// 非暗号化領域書き込み
+		/// </summary>
+		/// <param name="servicecode">サービスコード</param>
+		/// <param name="addr">ブロックアドレス</param>
+		/// <param name="data">書き込みデータ(最大16バイト)</param>
+		/// <returns>書き込みに成功した場合は0</returns>
 		public int WriteWithoutEncryption(int servicecode, byte addr, byte[] data)
 		{
             ArgumentNullException.ThrowIfNull(data);
@@ -175,7 +236,7 @@ namespace FelicaLib
 			return NativeMethods.felica_write_without_encryption(_felica, servicecode, addr, writeData);
 		}
 
-		// felica_free
+		// Felica解放
 		private void FreeFelica()
 		{
 			if (_felica != IntPtr.Zero)
@@ -188,7 +249,10 @@ namespace FelicaLib
 			}
 		}
 
-		// felica_getidm
+		/// <summary>
+        /// IDm取得
+        /// </summary>
+        /// <returns>IDmバイナリデータ</returns>
 		public byte[] GetIdm()
 		{
 			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
@@ -196,22 +260,28 @@ namespace FelicaLib
 			return IDm;
 		}
 
-		// felica_getpmm
-		public byte[] GetPmm()
+		/// <summary>
+        /// PMm取得
+        /// </summary>
+        /// <returns>PMmバイナリデータ</returns
+		public byte[] GetPMm()
 		{
 			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
 			PMm = _felicaStructure.Value.PMm;
 			return PMm;
 		}
 
-		// felica_enum_systemcode
+		/// <summary>
+		/// システムコード列挙
+		/// </summary>
+		/// <returns>システムコード配列</returns>
 		public ushort[] EnumSystemCode()
 		{
 			FreeFelica();
 			IntPtr f = NativeMethods.felica_enum_systemcode(_pasori);
 			if (f == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("felica_enum_systemcode failed");
+				throw new InvalidOperationException("Failed to enumerate system codes.");
 			}
 
 			// 取得した felica 構造体を読み込み、インスタンスフィールドを更新
@@ -222,14 +292,14 @@ namespace FelicaLib
 			if (sf.IDm.All(b => b == 0))
 			{
 				FreeFelica();
-				throw new InvalidOperationException("felica_enum_systemcode returned no system codes.");
+				throw new InvalidOperationException("Failed to retrieve system codes.");
 			}
 
 			// num_system_code に基づいて配列を切り出して返す
 			int count = sf.num_system_code;
 			if (count > 8)
 			{
-				throw new InvalidOperationException("felica_enum_systemcode returned invalid number of system codes.");
+				throw new InvalidOperationException("Failed to retrieve system codes.");
 			}
 			if (count <= 0) return [];
 			if (sf.system_code == null) return [];
@@ -244,14 +314,18 @@ namespace FelicaLib
 			return result;
 		}
 
-		// felica_enum_service
+		/// <summary>
+		/// サービスコード列挙
+		/// </summary>
+		/// <param name="systemcode">システムコード</param>
+		/// <returns>サービスコード配列</returns>
 		public ushort[] EnumServiceCode(ushort systemcode)
 		{
 			FreeFelica();
 			IntPtr f = NativeMethods.felica_enum_service(_pasori, systemcode);
 			if (f == IntPtr.Zero)
 			{
-				throw new InvalidOperationException("felica_enum_service failed");
+				throw new InvalidOperationException("Failed to enumerate service codes.");
 			}
 
 			var sf = Marshal.PtrToStructure<StrFelica>(f);
@@ -261,13 +335,13 @@ namespace FelicaLib
 			if (sf.IDm.All(b => b == 0))
 			{
 				FreeFelica();
-				throw new InvalidOperationException("felica_enum_service returned no service codes.");
+				throw new InvalidOperationException("Failed to retrieve service codes.");
 			}
 
 			int count = sf.num_service_code;
 			if (count > 256)
 			{
-				throw new InvalidOperationException("felica_enum_service returned invalid number of service codes.");
+				throw new InvalidOperationException("Failed to retrieve service codes.");
 			}
 			if (count <= 0) return [];
 			if (sf.service_code == null) return [];
@@ -291,7 +365,6 @@ namespace FelicaLib
 		{
 			if (_disposed) return;
 
-			// マネージドリソースの解除（無し）
 			// アンマネージドリソースの解除
 			FreeFelica();
 			if (_pasori != IntPtr.Zero)
@@ -307,6 +380,7 @@ namespace FelicaLib
 			_disposed = true;
 		}
 
+		// デストラクタ
 		~Felica()
 		{
 			Dispose(false);
