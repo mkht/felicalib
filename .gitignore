@@ -4,3 +4,5 @@
 *.ncb
 *.bak
 *.sdf
+**bin/
+**obj/
