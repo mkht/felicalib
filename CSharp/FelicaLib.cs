@@ -119,9 +119,16 @@ namespace FelicaLib
 		// felica_write_without_encryption
 		public int WriteWithoutEncryption(int servicecode, byte addr, byte[] data)
 		{
+            ArgumentNullException.ThrowIfNull(data);
+            if (data.Length > 16) throw new ArgumentException("data buffer must not exceed 16 bytes", nameof(data));
 			if (_felica == IntPtr.Zero) throw new InvalidOperationException("no polling executed.");
-			if (data == null || data.Length < 16) throw new ArgumentException("data buffer must be at least 16 bytes", nameof(data));
-			return NativeMethods.felica_write_without_encryption(_felica, servicecode, addr, data);
+			byte[] writeData = data;
+			if (data.Length < 16)
+			{
+				writeData = new byte[16];
+				Array.Copy(data, writeData, data.Length);
+			}
+			return NativeMethods.felica_write_without_encryption(_felica, servicecode, addr, writeData);
 		}
 
 		// felica_free
