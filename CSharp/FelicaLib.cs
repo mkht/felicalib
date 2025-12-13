@@ -99,6 +99,9 @@ namespace FelicaLib
 		private StrFelica? _felicaStructure = null;
 		private bool _disposed = false;
 
+		public byte[]? IDm { get; private set; }
+		public byte[]? PMm { get; private set; }
+
 		// constructor
 		public Felica()
 		{
@@ -136,7 +139,14 @@ namespace FelicaLib
 
             // felica構造体を取得
             _felicaStructure = Marshal.PtrToStructure<StrFelica>(_felica);
+			IDm = _felicaStructure.Value.IDm;
+			PMm = _felicaStructure.Value.PMm;
         }
+
+        public void Polling()
+		{
+			Polling((ushort)SystemCode.Any);
+		}
 
 		// felica_read_without_encryption02
 		public byte[] ReadWithoutEncryption(int servicecode, byte addr)
@@ -173,6 +183,8 @@ namespace FelicaLib
 				NativeMethods.felica_free(_felica);
 				_felica = IntPtr.Zero;
 				_felicaStructure = null;
+				IDm = null;
+				PMm = null;
 			}
 		}
 
@@ -180,24 +192,22 @@ namespace FelicaLib
 		public byte[] GetIdm()
 		{
 			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
-			return _felicaStructure.Value.IDm;
+			IDm = _felicaStructure.Value.IDm;
+			return IDm;
 		}
 
 		// felica_getpmm
 		public byte[] GetPmm()
 		{
 			if (_felica == IntPtr.Zero || !_felicaStructure.HasValue) throw new InvalidOperationException("no polling executed.");
-			return _felicaStructure.Value.PMm;
+			PMm = _felicaStructure.Value.PMm;
+			return PMm;
 		}
 
 		// felica_enum_systemcode
 		public ushort[] EnumSystemCode()
 		{
-			if (_pasori == IntPtr.Zero) throw new InvalidOperationException("pasori handle is not initialized.");
-
-			// 既存の_felicaがあれば解放
 			FreeFelica();
-
 			IntPtr f = NativeMethods.felica_enum_systemcode(_pasori);
 			if (f == IntPtr.Zero)
 			{
@@ -208,25 +218,36 @@ namespace FelicaLib
 			var sf = Marshal.PtrToStructure<StrFelica>(f);
 			_felica = f;
 			_felicaStructure = sf;
+			// IDmがすべて0の場合、サービスコードが取得できなかったと判断
+			if (sf.IDm.All(b => b == 0))
+			{
+				FreeFelica();
+				throw new InvalidOperationException("felica_enum_systemcode returned no system codes.");
+			}
 
 			// num_system_code に基づいて配列を切り出して返す
 			int count = sf.num_system_code;
+			if (count > 8)
+			{
+				throw new InvalidOperationException("felica_enum_systemcode returned invalid number of system codes.");
+			}
 			if (count <= 0) return [];
 			if (sf.system_code == null) return [];
-
 			ushort[] result = new ushort[count];
-			Array.Copy(sf.system_code, result, Math.Min(count, sf.system_code.Length));
+			// felica_enum_systemcode で取得した system_code はバイトオーダーが逆なので変換する
+			for (int i = 0; i < result.Length; i++)
+			{
+				result[i] = (ushort)((sf.system_code[i] << 8) | (sf.system_code[i] >> 8));
+			}
+			IDm = sf.IDm;
+			PMm = sf.PMm;
 			return result;
 		}
 
 		// felica_enum_service
-		public ushort[] EnumService(ushort systemcode)
+		public ushort[] EnumServiceCode(ushort systemcode)
 		{
-			if (_pasori == IntPtr.Zero) throw new InvalidOperationException("pasori handle is not initialized.");
-
-			// 既存の_felicaがあれば解放
 			FreeFelica();
-
 			IntPtr f = NativeMethods.felica_enum_service(_pasori, systemcode);
 			if (f == IntPtr.Zero)
 			{
@@ -236,13 +257,26 @@ namespace FelicaLib
 			var sf = Marshal.PtrToStructure<StrFelica>(f);
 			_felica = f;
 			_felicaStructure = sf;
+			// IDmがすべて0の場合、サービスコードが取得できなかったと判断
+			if (sf.IDm.All(b => b == 0))
+			{
+				FreeFelica();
+				throw new InvalidOperationException("felica_enum_service returned no service codes.");
+			}
 
 			int count = sf.num_service_code;
+			if (count > 256)
+			{
+				throw new InvalidOperationException("felica_enum_service returned invalid number of service codes.");
+			}
 			if (count <= 0) return [];
 			if (sf.service_code == null) return [];
 
 			ushort[] result = new ushort[count];
 			Array.Copy(sf.service_code, result, Math.Min(count, sf.service_code.Length));
+
+			IDm = sf.IDm;
+			PMm = sf.PMm;
 			return result;
 		}
 
